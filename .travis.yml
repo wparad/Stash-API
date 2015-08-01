@@ -16,6 +16,7 @@ deploy:
     all_branches: true
 branches:
   only:
+  - master
   - /^release.*/
 env:
   global:
