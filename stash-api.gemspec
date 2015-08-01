@@ -1,9 +1,16 @@
-#require 'rake'
-#require 'travis-build-tools'
+RELEASE_VERSION = case
+  #Builds of pull requests
+  when !(ENV['TRAVIS_PULL_REQUEST'] || 'false').match(/false/i) then "0.#{ENV['TRAVIS_PULL_REQUEST']}"
+  #Builds of branches that aren't master or release
+  when !ENV['TRAVIS_BRANCH'] || !ENV['TRAVIS_BRANCH'].match(/^release[\/-]/i) then '0.0'
+  #Builds of release branches (or locally or on server)
+  else ENV['TRAVIS_BRANCH'].match(/^release[\/-](\d+\.\d+)$/i)[1]
+end
+VERSION = Gem::Version.new("#{RELEASE_VERSION}.#{ENV['TRAVIS_BUILD_NUMBER'] || '0'}.0")
 
 Gem::Specification.new() do |s|
   s.name = 'stash-api'
-  s.version = '0.0.0.0' #TravisBuildTools::Build::VERSION.to_s
+  s.version = VERSION.to_s
   s.platform = Gem::Platform::RUBY
   s.authors = ['Warren Parad']
   s.license = 'BSD-3-Clause'
