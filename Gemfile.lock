@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stash-api (1.0)
+    stash-api (0.0)
       bundler (~> 1.10)
       rest-client (~> 1.8)
       rubyzip (~> 1.1)
@@ -16,6 +16,7 @@ GEM
       domain_name (~> 0.5)
     mime-types (2.6.1)
     netrc (0.10.3)
+    rake (10.4.2)
     rest-client (1.8.0)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
@@ -47,6 +48,7 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
+  rake!
   rspec!
   stash-api!
   travis-build-tools!
