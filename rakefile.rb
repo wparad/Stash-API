@@ -10,6 +10,7 @@ require 'tmpdir'
 require 'travis-build-tools'
 
 #Environment variables: http://docs.travis-ci.com/user/environment-variables/
+PWD = File.dirname(__FILE__)
 
 #### TASKS ####
   RSpec::Core::RakeTask.new(:spec)
@@ -30,5 +31,5 @@ task :display_repository do
   puts Dir.glob(File.join(PWD, '**', '*'), File::FNM_DOTMATCH).select{|f| !f.match(/\/(\.git|vendor|bundle)\//)}
 end
 task :set_owner do
-  system("gem owner travis-build-tools -a wparad@gmail.com")
+  system("gem owner stash-api -a wparad@gmail.com")
 end

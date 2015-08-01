@@ -1,8 +1,9 @@
-#require 'travis-build-tools'
+require 'rake'
+require 'travis-build-tools'
 
 Gem::Specification.new() do |s|
   s.name = 'stash-api'
-  s.version = '0.0' #TravisBuildTools::Build::VERSION.to_s
+  s.version = TravisBuildTools::Build::VERSION.to_s
   s.platform = Gem::Platform::RUBY
   s.authors = ['Warren Parad']
   s.license = 'BSD-3-Clause'
