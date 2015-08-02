@@ -1,4 +1,4 @@
-module StashAPI
+module Stash
   module DSL
   end
 end
