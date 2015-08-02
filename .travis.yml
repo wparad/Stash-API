@@ -12,7 +12,7 @@ deploy:
     secure: Tfn1n5j7NDqogGG5ngE2Qy49Ep1gkyajyEoho46zgDlnFhdK98bQG5nO7Wu/6TUVN8QQk9X788qrLdWrmFMy46DOb9moOzMpnKQ1XsyzLQbUcmPWU77NMv5jQFVmNQujXG2Mbu6RyPbNNzqc8m/nP0dbjW0AaRF+km6tGtR4OIMqNFBJauB2ggX16hg7x6eBcgRfI8/p4ppdj6KTqGsfWZ//zNJh/xQQmlIi1Kl/ovMCiv7JCkYZu9Wx9sHLX1ri4ZelPKy24ega50j7k11+5Ys5mtQr7rBgQH39zU16Xl/22tHcS0pn5TT9U0CaitY8zjMMxFvBpY2/8Q+RWsoMGpBbuYpUOiKLagCGi4mgM4jaTB48PWvYrVC8OAYGZWJlllaDCzhqxqc0na0UMsM03hVVVqqzhL+tQ57kmSj91eZNfAIcewMnkQMSbgE06LFp9+J6G3/b8SmkNdniwMW5L2r+tOvykyOTtXBzGN5jzXGxZxk1RhWPW96gAwG5KF/+PWIJ8IsnSAVk6u966yHLSLsBmIm40GDYBbPDt0OIbIs54kF9ss8iSCL33tj3UvYd3xdLSw0fYUcn7Mij6/wZd+YcHB9Vg+bYThyS4vBNJKIOtDNY7y/1yWOWdpVVR7OMu429uUajcK5HsiF8tUCFMGQCo3dsrkYgiE+DLxY1MHY=
   skip_cleanup: true
   on:
-    condition: $TRAVIS_BRANCH =~ ^release
+    condition: $TRAVIS_BRANCH != master
 branches:
   only:
   - master
