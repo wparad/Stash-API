@@ -18,7 +18,7 @@ NAME = 'stash-api'
 
   task :default => [:spec]
 
-  desc "Install new version of #{NAME}"
+  desc "Install new version of #{NAME} locally"
   task :redeploy => [:uninstall, :repackage, :deploy]
 
   task :after_build => [:publish_git_tag, :display_repository]
