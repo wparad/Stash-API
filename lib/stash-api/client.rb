@@ -4,13 +4,13 @@ module Stash
   class Client
     attr_accessor :server, :project, :repository_name
 
-    def initialize(username, password, follow_fork = true, url = nil)
+    def initialize(username, password, config = {:follow_fork => true, :url => nil})
       raise 'API username must be specified' if !username
       raise 'API password must be specified' if !password
       @username = username
       @password = password
 
-      remote_origin_url = url || %x[git config --get remote.origin.url]
+      remote_origin_url = config[:url] || %x[git config --get remote.origin.url]
       raise "Repository URL is not set and cannot be inferred from the git config." if !remote_origin_url
 
       match = remote_origin_url.match(/(ssh|https?):\/\/([^@]*@)?(?<server>[^\:\/]*)[^\/]*\/(scm\/)?(?<project>[^\/].*)\/(?<repository_name>[^\/]*)\.git$/)
@@ -25,13 +25,13 @@ module Stash
       repository_information = JSON::pretty_generate(JSON.parse(json))
       
       #If the repository is a fork, use it's forked source to get this information
-      if repository_information['origin'] && follow_fork
+      if repository_information['origin'] && config[:follow_fork]
         @project = repository_information['origin']['project']['key']
         @repository_name = repository_information['origin']['slug']
       end
     end
     
-    def setup_repository(hash = {})
+    def setup_repository(config = {})
       #Set branch permissions (this should just be a list)
         #group on edits/no changing history
         #service user on tags
@@ -41,11 +41,12 @@ module Stash
     end
     
     def get_configuration()
+      config = {}
       #Get branch permissions
       #Get Hooks and their configuration
       #Get pull request settings
       #Get branching strategy
-      {}
+      config
     end
   end
 end
