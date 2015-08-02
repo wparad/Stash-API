@@ -22,6 +22,8 @@ module Stash
 
       @remote_api_url = File.join("https://#{@server}", 'rest', 'api', '1.0', 'projects', @project, 'repos', @repository_name)
       @branch_permissions_url = File.join("https://#{@server}", 'rest', 'branch-permissions', '2.0', 'projects', @project, 'repos', @repository_name, 'restrictions')
+      @branchring_model_url = File.join("https://#{@server}", 'rest', 'branch-utils', '1.0', 'projects', @project, 'repos', @repository_name)
+      @pull_request_settings = File.join("https://#{@server}", 'rest', 'pullrequest-settings', '1.0', 'projects', @project, 'repos', @repository_name)
       json = RestClient::Resource.new(@remote_api_url, {:user => @username, :password => @password, :verify_ssl => config[:verify_ssl]}).get
       repository_information = JSON::pretty_generate(JSON.parse(json))
 
@@ -112,11 +114,69 @@ module Stash
           return JSON::parse(response)
       end
     end
-
-    def get_pull_request_settings()
+      
+    def set_pull_request_settings(settings)
+      RestClient::Request.new(
+        :method => :put,
+        :url => URI::encode(File.join(@pull_request_settings, 'requiredBuildsCount', settings[:builds].to_s)),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          raise "Could not get set required builds - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+      end if settings[:builds]
+      RestClient::Request.new(
+        :method => :put,
+        :url => URI::encode(File.join(@pull_request_settings, 'requiredApproversCount', settings[:approvers].to_s)),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          raise "Could not get set pull request approvers - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+      end if settings[:approvers]
     end
 
-    def get_branching_strategy()
+    def get_pull_request_settings()
+      settings = {}
+      RestClient::Request.new(
+        :method => :get,
+        :url => URI::encode(File.join(@pull_request_settings, 'requiredBuildsCount')),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          settings[:builds] = response.body if response.code.to_s.match(/^2\d{2}$/)
+      end
+      RestClient::Request.new(
+        :method => :get,
+        :url => URI::encode(File.join(@pull_request_settings, 'requiredApproversCount')),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          settings[:approvers] = response.body if response.code.to_s.match(/^2\d{2}$/)
+      end
+      settings
+    end
+
+    BRANCHING_MODEL_URL = File.join('automerge', 'enabled')
+    def set_automatic_merging()
+      RestClient::Request.new(
+        :method => :put,
+        :url => URI::encode(File.join(@branchring_model_url, BRANCHING_MODEL_URL)),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          raise "Could not get branchig model - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+      end
+    end
+
+    def get_automatic_merging()
+      RestClient::Request.new(
+        :method => :get,
+        :url => URI::encode(File.join(@branchring_model_url, BRANCHING_MODEL_URL)),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          raise "Could not get branchig model - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+          return response.code == 204
+      end
     end
 
   end
