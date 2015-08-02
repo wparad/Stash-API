@@ -24,24 +24,16 @@ module Stash
       @branch_permissions_url = File.join("https://#{@server}", 'rest', 'branch-permissions', '2.0', 'projects', @project, 'repos', @repository_name, 'restrictions')
       json = RestClient::Resource.new(@remote_api_url, {:user => @username, :password => @password, :verify_ssl => config[:verify_ssl]}).get
       repository_information = JSON::pretty_generate(JSON.parse(json))
-      
+
       #If the repository is a fork, use it's forked source to get this information
       if repository_information['origin'] && config[:follow_fork]
         @project = repository_information['origin']['project']['key']
         @repository_name = repository_information['origin']['slug']
       end
     end
-    
+
     SETTINGS_HOOKS_URL = File.join('settings', 'hooks')
-    def setup_repository(config = {})
-      #Set branch permissions (this should just be a list)
-        #group on edits/no changing history
-        #service user on tags
-      #Set Hooks should be a list that allows an hash to be inspected
-      #Pull request settings
-      #Set branching strategy
-    end
-    
+
     def set_hooks(hooks)
       hooks.keys.each do |hook|
         RestClient::Request.new(
@@ -93,22 +85,37 @@ module Stash
       end
       config
     end
-    
+
+    def set_branch_permissions(permissions)
+      raise "permissions list is required" if !permissions
+      [permissions].flatten.each do |permission|
+        RestClient::Request.new(
+          :method => :post,
+          :url => URI::encode("#{@branch_permissions_url}?"),
+          :user => @username,
+          :password => @password,
+          :payload => permission.to_json,
+          :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+            raise "Could not set branch permissions - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+        end
+      end
+    end
+
     def get_branch_permissions()
-      @branch_permissions_url
       RestClient::Request.new(
         :method => :get,
-        :url => URI::encode(@branch_permissions_url),
+        :url => URI::encode("#{@branch_permissions_url}?limit=1000"),
         :user => @username,
         :password => @password,
         :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
           raise "Could not get branch permissions - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+          return JSON::parse(response)
       end
     end
-    
+
     def get_pull_request_settings()
     end
-    
+
     def get_branching_strategy()
     end
 

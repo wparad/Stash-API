@@ -9,6 +9,7 @@ Ruby Stash API library.
 
 	#!/usr/bin/ruby
 
+	require 'json'
 	require 'stash-api'
 
 	stash_client = Stash::Client.new('username', 'password')
@@ -25,7 +26,31 @@ Ruby Stash API library.
 	  'com.atlassian.stash.plugin.stash-protect-unmerged-branch-hook:protect-unmerged-branch-hook' => {}
 	  }
 	}
-	
+
 	stash_client.set_hooks(hooks)
+
+	puts JSON::pretty_generate(stash_client.get_branch_permissions())
+
+	permissions = [
+	  {
+		'type' => 'fast-forward-only',
+		'matcher' => {
+		  'id' => 'development',
+		  'type' => {
+			'id' => 'MODEL_BRANCH'
+		  }
+		}
+	  },
+	  {
+		'type' => 'no-deletes',
+		'matcher' => {
+		  'id' => 'development',
+		  'type' => {
+			'id' => 'MODEL_BRANCH'
+		  }
+		}
+	  }
+	]
+	stash_client.set_branch_permissions(permissions)
 
 	puts JSON::pretty_generate(stash_client.get_branch_permissions())
