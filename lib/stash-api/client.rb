@@ -39,5 +39,13 @@ module Stash
       #Pull request settings
       #Set branching strategy
     end
+    
+    def get_configuration()
+      #Get branch permissions
+      #Get Hooks and their configuration
+      #Get pull request settings
+      #Get branching strategy
+      {}
+    end
   end
 end
