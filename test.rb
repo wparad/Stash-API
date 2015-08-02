@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require 'stash-api'
+require_relative 'lib/stash-api'
 
 puts "Enter username:"
 username = STDIN.gets.chomp

@@ -56,6 +56,6 @@ task :deploy do
       FileUtils.cp(gem, 'gems')
       %x[gem generate_index]
     end
-    puts %x[gem install pkg/*.gem --no-ri --no-rdoc -u -N]
+    puts %x[gem install pkg/*.gem --no-ri --no-rdoc -u]
   end
 end
