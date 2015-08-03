@@ -16,14 +16,11 @@ module Stash
 
       match = remote_origin_url.match(/(ssh|https?):\/\/([^@]*@)?(?<server>[^\:\/]*)[^\/]*\/(scm\/)?(?<project>[^\/].*)\/(?<repository_name>[^\/]*)\.git$/)
       raise "Remote origin cannot be inferred from the url: #{remote_origin_url}.  Run `git remote add origin URL` to add an origin." if !match
-      @server = match[:server]
-      @project = match[:project]
-      @repository_name = match[:repository_name]
 
-      @remote_api_url = File.join("https://#{@server}", 'rest', 'api', '1.0', 'projects', @project, 'repos', @repository_name)
-      @branch_permissions_url = File.join("https://#{@server}", 'rest', 'branch-permissions', '2.0', 'projects', @project, 'repos', @repository_name, 'restrictions')
-      @branchring_model_url = File.join("https://#{@server}", 'rest', 'branch-utils', '1.0', 'projects', @project, 'repos', @repository_name)
-      @pull_request_settings = File.join("https://#{@server}", 'rest', 'pullrequest-settings', '1.0', 'projects', @project, 'repos', @repository_name)
+      @remote_api_url = File.join("https://#{match[:server]}", 'rest', 'api', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
+      @branch_permissions_url = File.join("https://#{match[:server]}", 'rest', 'branch-permissions', '2.0', 'projects', match[:project], 'repos', match[:repository_name], 'restrictions')
+      @branchring_model_url = File.join("https://#{match[:server]}", 'rest', 'branch-utils', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
+      @pull_request_settings = File.join("https://#{match[:server]}", 'rest', 'pullrequest-settings', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
 
       repository_information = nil
       RestClient::Request.new(
@@ -35,14 +32,13 @@ module Stash
           repository_information = JSON.parse(response.body)
           raise "Could not retrieve repository information - #{JSON::pretty_generate(repository_information)}" if !response.code.to_s.match(/^2\d{2}$/)
       end
-      @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
 
       #If the repository is a fork, use it's forked source to get this information
-      if repository_information['origin'] && config[:follow_fork]
-        @project = repository_information['origin']['project']['key']
-        @repository_name = repository_information['origin']['slug']
-        @ssh_url = repository_information['origin']['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
-      end
+      repository_information = repository_information['origin'] if repository_information['origin'] && config[:follow_fork]
+      puts JSON::pretty_generate(repository_information)
+      @project = repository_information['project']['key']
+      @repository_name = repository_information['slug']
+      @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
     end
 
     SETTINGS_HOOKS_URL = File.join('settings', 'hooks')
@@ -61,7 +57,6 @@ module Stash
               raise "Could not configure hook: #{hook} - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
           end
         end
-
         RestClient::Request.new(
           :method => :put,
           :url => URI::encode("#{File.join(@remote_api_url, SETTINGS_HOOKS_URL)}/#{hook}/enabled"),
