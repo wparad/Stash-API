@@ -32,8 +32,8 @@ module Stash
         :user => @username,
         :password => @password,
         :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
-          raise "Could not retrieve repository information - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
-          repository_information = JSON::pretty_generate(JSON.parse(json))
+          repository_information = JSON::pretty_generate(JSON.parse(response.body))
+          raise "Could not retrieve repository information - #{repository_information}" if !response.code.to_s.match(/^2\d{2}$/)
       end
       @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
 
