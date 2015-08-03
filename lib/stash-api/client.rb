@@ -16,16 +16,12 @@ module Stash
 
       match = remote_origin_url.match(/(ssh|https?):\/\/([^@]*@)?(?<server>[^\:\/]*)[^\/]*\/(scm\/)?(?<project>[^\/].*)\/(?<repository_name>[^\/]*)\.git$/)
       raise "Remote origin cannot be inferred from the url: #{remote_origin_url}.  Run `git remote add origin URL` to add an origin." if !match
-
-      @remote_api_url = File.join("https://#{match[:server]}", 'rest', 'api', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
-      @branch_permissions_url = File.join("https://#{match[:server]}", 'rest', 'branch-permissions', '2.0', 'projects', match[:project], 'repos', match[:repository_name], 'restrictions')
-      @branchring_model_url = File.join("https://#{match[:server]}", 'rest', 'branch-utils', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
-      @pull_request_settings = File.join("https://#{match[:server]}", 'rest', 'pullrequest-settings', '1.0', 'projects', match[:project], 'repos', match[:repository_name])
+      @server = match[:server]
 
       repository_information = nil
       RestClient::Request.new(
         :method => :get,
-        :url => URI::encode(@remote_api_url),
+        :url => URI::encode(File.join("https://#{@server}", 'rest', 'api', '1.0', 'projects', match[:project], 'repos', match[:repository_name])),
         :user => @username,
         :password => @password,
         :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
@@ -39,6 +35,12 @@ module Stash
       @project = repository_information['project']['key']
       @repository_name = repository_information['slug']
       @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
+      
+      #Set remote api URLs
+      @remote_api_url = File.join("https://#{@server}", 'rest', 'api', '1.0', 'projects', @project, 'repos', @repository_name)
+      @branch_permissions_url = File.join("https://#{@server}", 'rest', 'branch-permissions', '2.0', 'projects', @project, 'repos', @repository_name, 'restrictions')
+      @branchring_model_url = File.join("https://#{@server}", 'rest', 'branch-utils', '1.0', 'projects', @project, 'repos', @repository_name)
+      @pull_request_settings = File.join("https://#{@server}", 'rest', 'pullrequest-settings', '1.0', 'projects', @project, 'repos', @repository_name)
     end
 
     SETTINGS_HOOKS_URL = File.join('settings', 'hooks')
