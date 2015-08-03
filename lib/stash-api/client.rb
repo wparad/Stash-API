@@ -35,7 +35,7 @@ module Stash
 
       #If the repository is a fork, use it's forked source to get this information
       repository_information = repository_information['origin'] if repository_information['origin'] && config[:follow_fork]
-      puts JSON::pretty_generate(repository_information)
+
       @project = repository_information['project']['key']
       @repository_name = repository_information['slug']
       @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
