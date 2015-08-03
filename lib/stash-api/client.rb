@@ -49,15 +49,6 @@ module Stash
 
     def set_hooks(hooks)
       hooks.keys.each do |hook|
-        RestClient::Request.new(
-          :method => :put,
-          :url => URI::encode("#{File.join(@remote_api_url, SETTINGS_HOOKS_URL)}/#{hook}/enabled"),
-          :user => @username,
-          :password => @password,
-          :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
-            raise "Could not enable hook: #{hook} - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
-        end
-
         config = hooks[hook][:config]
         if config
           RestClient::Request.new(
@@ -69,6 +60,15 @@ module Stash
             :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
               raise "Could not configure hook: #{hook} - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
           end
+        end
+
+        RestClient::Request.new(
+          :method => :put,
+          :url => URI::encode("#{File.join(@remote_api_url, SETTINGS_HOOKS_URL)}/#{hook}/enabled"),
+          :user => @username,
+          :password => @password,
+          :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+            raise "Could not enable hook: #{hook} - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
         end
       end
     end
