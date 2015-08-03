@@ -3,7 +3,7 @@ require 'rest-client'
 
 module Stash
   class Client
-    attr_accessor :server, :project, :repository_name
+    attr_accessor :server, :project, :repository_name, :ssh_url
 
     def initialize(username, password, config = {:follow_fork => true, :url => nil, :verify_ssl => true})
       raise 'API username must be specified' if !username
@@ -25,12 +25,24 @@ module Stash
       @branchring_model_url = File.join("https://#{@server}", 'rest', 'branch-utils', '1.0', 'projects', @project, 'repos', @repository_name)
       @pull_request_settings = File.join("https://#{@server}", 'rest', 'pullrequest-settings', '1.0', 'projects', @project, 'repos', @repository_name)
       json = RestClient::Resource.new(@remote_api_url, {:user => @username, :password => @password, :verify_ssl => config[:verify_ssl]}).get
-      repository_information = JSON::pretty_generate(JSON.parse(json))
+      
+      repository_information = nil
+      RestClient::Request.new(
+        :method => :get,
+        :url => URI::encode(@remote_api_url),
+        :user => @username,
+        :password => @password,
+        :headers => { :accept => :json, :content_type => :json }).execute do |response, request, result|
+          raise "Could not retrieve repository information - #{JSON::pretty_generate(JSON::parse(response.body))}" if !response.code.to_s.match(/^2\d{2}$/)
+          repository_information = JSON::pretty_generate(JSON.parse(json))
+      end
+      @ssh_url = repository_information['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
 
       #If the repository is a fork, use it's forked source to get this information
       if repository_information['origin'] && config[:follow_fork]
         @project = repository_information['origin']['project']['key']
         @repository_name = repository_information['origin']['slug']
+        @ssh_url = repository_information['origin']['links']['clone'].select{|link| link['name'].match(/^ssh$/i)}.first['href']
       end
     end
 
