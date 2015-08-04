@@ -21,15 +21,18 @@ NAME = 'stash-api'
   desc "Install new version of #{NAME} locally"
   task :redeploy => [:uninstall, :repackage, :deploy]
 
-  task :after_build => [:publish_git_tag, :display_repository]
+  task :after_build => [:display_repository, :publish_git_tag, :merge_downstream]
 
 Gem::PackageTask.new(Gem::Specification.load(Dir['*.gemspec'].first)) do |pkg|
 end
 
-publish_git_tag :publish_git_tag do |t, args|
-  t.git_repository = %x[git config --get remote.origin.url].split('://')[1]
-  t.tag_name = TravisBuildTools::Build::VERSION.to_s
-  t.service_user = ENV['GIT_TAG_PUSHER']
+BUILDER = TravisBuildTools::Builder.new(ENV['GIT_TAG_PUSHER'] || ENV['USER'])
+task :publish_git_tag do
+  BUILDER.publish_git_tag(TravisBuildTools::Build::VERSION.to_s)
+end
+
+task :merge_downstream do
+  BUILDER.merge_downstream('release/', 'master')
 end
 
 task :display_repository do
