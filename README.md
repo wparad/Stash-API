@@ -61,3 +61,9 @@ Ruby Stash API library.
 	#Set up pull request merge settings
 	puts stash_client.get_pull_request_settings()
 	stash_client.set_pull_request_settings({:builds => 1, :approvers => 1})
+
+	stash_explorer = Stash::Explorer.new('username', 'password', 'stash.server.com')
+    stash_explorer.get_repositories('MyKey').each do |repo|
+      content = stash.get_file('MyKey', repo, 'Gemfile.lock')
+      puts "#{repo}: #{content}"
+    end
