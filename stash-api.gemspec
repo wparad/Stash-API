@@ -24,5 +24,5 @@ Gem::Specification.new() do |s|
   s.require_paths = ['lib']
   s.add_runtime_dependency('bundler', '~> 1.10')
   s.add_runtime_dependency('rest-client', '~>1.8')
-  s.add_runtime_dependency('rubyzip', '~> 1.1')
+  s.add_runtime_dependency('rubyzip', '>= 1.1', '< 3.0')
 end
