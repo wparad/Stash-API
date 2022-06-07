@@ -14,7 +14,7 @@ Gem::Specification.new() do |s|
   s.platform = Gem::Platform::RUBY
   s.authors = ['Warren Parad']
   s.license = 'BSD-3-Clause'
-  s.email = ["wparad@gmail.com"]
+  s.email = ["developers@gmail.com"]
   s.homepage = 'https://github.com/wparad/Stash-API'
   s.summary = 'A lightweight build and deployment tool wrapper'
   s.description = "Stash API is a ruby library to interact with stash rest API."

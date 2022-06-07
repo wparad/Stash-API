@@ -40,7 +40,7 @@ task :display_repository do
 end
 
 task :set_owner do
-  system("gem owner #{NAME} -a wparad@gmail.com")
+  system("gem owner #{NAME}")
 end
 
 task :uninstall do
